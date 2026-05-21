@@ -1,0 +1,750 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+<title>DEALAMP</title>
+<style>
+  * { box-sizing: border-box; }
+  html, body {
+    margin: 0; padding: 0;
+    background: #1d1d1d;
+    color: #ddd;
+    font-family: 'Lucida Console','Monaco','Courier New',monospace;
+    font-size: 11px;
+    -webkit-text-size-adjust: 100%;
+  }
+  #app { max-width: 390px; margin: 0 auto; background: #1d1d1d; min-height: 100vh; }
+  button { font-family: inherit; }
+  input { font-family: inherit; }
+  .header-bar {
+    background: linear-gradient(180deg, #3a3a3a 0%, #1a1a1a 100%);
+    padding: 8px 10px;
+    border-bottom: 1px solid #333;
+    display: flex; justify-content: space-between; align-items: center;
+  }
+  .header-bar .brand { font-size: 10px; letter-spacing: 2px; color: #00e040; }
+  .header-bar .brand strong { text-transform: uppercase; font-weight: normal; }
+  .header-bar .credit { font-size: 10px; letter-spacing: 2px; text-transform: uppercase; color: #e24545; }
+  .stats { display: flex; border-bottom: 1px solid #333; }
+  .stats .cell { flex: 1; padding: 8px 0; text-align: center; border-right: 1px solid #333; }
+  .stats .cell:last-child { border-right: none; }
+  .stats .val { font-size: 15px; font-weight: bold; color: #00e040; line-height: 1; }
+  .stats .label { font-size: 9px; color: #bbb; letter-spacing: 1px; margin-top: 3px; }
+  .show-buttons {
+    padding: 6px 8px; background: #282828;
+    display: flex; flex-wrap: wrap; gap: 5px;
+    border-bottom: 1px solid #333;
+  }
+  .show-btn {
+    font-size: 11px; padding: 6px 0; cursor: pointer; border-radius: 10px;
+    background: transparent; color: #ccc;
+    display: flex; align-items: center; justify-content: center; gap: 4px;
+    letter-spacing: 0.3px; width: calc(33.33% - 4px);
+    border: 1px solid #333;
+  }
+  .show-btn .dot { width: 6px; height: 6px; border-radius: 50%; flex-shrink: 0; }
+  .setlist-panel {
+    padding: 8px 10px; background: #222;
+    border-bottom: 1px solid #333; overflow-wrap: break-word;
+  }
+  .setlist-header { font-size: 11px; letter-spacing: 1px; margin-bottom: 4px; text-transform: uppercase; }
+  .setlist-body { font-size: 11px; color: #ddd; line-height: 1.6; }
+  .set-label { font-weight: bold; margin-right: 4px; }
+  .search-row { padding: 6px 10px; border-bottom: 1px solid #333; }
+  .search-row input {
+    width: 100%; padding: 5px 8px;
+    font-size: 11px; border: 1px solid #333; border-radius: 0;
+    background: #111; color: #00e040; outline: none;
+  }
+  .sort-row { padding: 5px 10px; display: flex; gap: 4px; border-bottom: 1px solid #333; align-items: center; }
+  .sort-btn {
+    font-size: 8px; padding: 2px 5px; cursor: pointer; border: none; border-radius: 0;
+    background: transparent; color: #5a5a4e;
+  }
+  .sort-btn.active { background: #00a830; color: #1d1d1d; }
+  .grid-header { padding: 0 10px; display: flex; align-items: flex-end; }
+  .grid-header-spacer { width: 22px; }
+  .grid-header-flex { flex: 1; }
+  .grid-header-days-label { width: 28px; text-align: right; font-size: 6px; color: #999; padding-right: 8px; padding-bottom: 2px; align-self: flex-end; }
+  .grid-header-shows { padding: 4px 0 2px; }
+  .grid-header-row { display: flex; }
+  .grid-header-cell { width: 15px; text-align: center; font-size: 8px; letter-spacing: 0.3px; line-height: 1; }
+  .song-list { padding: 0 10px; }
+  .song-row { display: flex; align-items: center; padding: 3px 0; }
+  .song-count {
+    width: 22px; text-align: center; font-size: 11px; font-weight: bold; flex-shrink: 0;
+  }
+  .song-name-cell { flex: 1; display: flex; align-items: center; gap: 5px; overflow: hidden; padding-left: 4px; }
+  .song-name { font-size: 11px; color: #bbb; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; line-height: 1; }
+  .song-name.canonical { color: #888; font-style: italic; }
+  .canonical-star { color: #e2a845; margin-left: 3px; }
+  .days-cell { width: 28px; text-align: right; font-size: 7px; color: #bbb; flex-shrink: 0; padding-right: 8px; }
+  .dots-cell { display: flex; flex-shrink: 0; }
+  .dot-slot {
+    width: 15px; height: 18px;
+    display: flex; align-items: center; justify-content: center;
+  }
+  .dot-slot .play-dot { width: 10px; height: 10px; border-radius: 50%; }
+  .dot-slot .miss-x { font-size: 7px; color: #2a2a2a; font-weight: bold; line-height: 1; }
+  .group-divider { height: 1px; background: #333; margin: 2px 0; }
+</style>
+</head>
+<body>
+<div id="app"></div>
+
+<script>
+"use strict";
+
+// ===== DATA =====
+const SHOWS = [
+  { date: "2026-05-16", short: "5/16", venue: "The Shakedown",       abbr: "Shakedown",   color: "#e24545" },
+  { date: "2026-04-17", short: "4/17", venue: "Tim's Tavern",         abbr: "Tim's",       color: "#85e245" },
+  { date: "2026-03-21", short: "3/21", venue: "Hidden Hall",          abbr: "H. Hall",     color: "#b04ad9" },
+  { date: "2026-03-06", short: "3/6",  venue: "Two Vintners Winery",  abbr: "Vintners",    color: "#4585e2" },
+  { date: "2026-02-13", short: "2/13", venue: "Ilk Lodge",            abbr: "Ilk Lodge",   color: "#68e245" },
+  { date: "2026-01-30", short: "1/30", venue: "Arcadian Public House",abbr: "Conway",      color: "#e2e245" },
+  { date: "2026-01-22", short: "1/22", venue: "Hidden Hall",          abbr: "H. Hall",     color: "#45e2c4" },
+  { date: "2026-01-09", short: "1/9",  venue: "Spanish Ballroom",     abbr: "Spanish",     color: "#d94590" },
+  { date: "2026-01-03", short: "1/3",  venue: "White Eagle",          abbr: "White Eagle", color: "#d9a845" },
+  { date: "2025-12-12", short: "12/12",venue: "Hidden Hall",          abbr: "H. Hall",     color: "#e26845" },
+  { date: "2025-12-06", short: "12/6", venue: "The Shakedown",        abbr: "Shakedown",   color: "#a845e2" },
+  { date: "2025-11-22", short: "11/22",venue: "APEX",                 abbr: "APEX",        color: "#e24585" },
+];
+
+const SETLISTS = {
+  "2026-05-16": { setBreak: 8, songs: [
+    {n:"Scarlet",s:1},{n:"Fire",s:0},{n:"Don't Let Go",s:0},{n:"Me & Uncle",s:0},{n:"Waiting",s:0},{n:"Viola Lee",s:0},{n:"Brown Eyed",s:0},{n:"Ripple",s:0},
+    {n:"Jack Straw",s:0},{n:"St. Stephen",s:1},{n:"The Eleven",s:1},{n:"Other One",s:0},{n:"Loser",s:0},{n:"Sat. Night",s:0},{n:"Foolish",s:1},{n:"Franklin's",s:0}
+  ]},
+  "2026-04-17": { setBreak: 9, songs: [
+    {n:"Eyes",s:1},{n:"Tenn. Jed",s:0},{n:"Mr. Charlie",s:0},{n:"Half-Step",s:0},{n:"Greatest",s:0},{n:"Black Peter",s:0},{n:"Waiting",s:0},{n:"Cassidy",s:0},{n:"Deal",s:0},
+    {n:"Cats",s:0},{n:"China Cat",s:1},{n:"Rider",s:0},{n:"He's Gone",s:1},{n:"Other One",s:1},{n:"He's Gone",s:0},{n:"Built To Last",s:0},{n:"Esau",s:0},{n:"Alabama",s:0},{n:"Music",s:0}
+  ]},
+  "2026-03-21": { setBreak: 10, songs: [
+    {n:"Bertha",s:0},{n:"Stranger",s:0},{n:"Althea",s:0},{n:"Walkin' Blues",s:0},{n:"Friend",s:0},{n:"Rubin",s:0},{n:"Sugaree",s:0},{n:"Loser",s:0},{n:"Let It Grow",s:0},{n:"Might As Well",s:0},
+    {n:"Sat. Night",s:0},{n:"Shakedown",s:0},{n:"Estimated",s:0},{n:"China Doll",s:0},{n:"Terrapin",s:0},{n:"Ramble",s:0},{n:"St. Stephen",s:0},{n:"Casey",s:0},{n:"US Blues",s:0}
+  ]},
+  "2026-03-06": { setBreak: 9, songs: [
+    {n:"Sugar Mag",s:1},{n:"Scarlet",s:1},{n:"Fire",s:0},{n:"Tom Thumb",s:0},{n:"Brown Eyed",s:0},{n:"Golden Rd",s:1},{n:"Cold Rain",s:0},{n:"Jack Straw",s:0},{n:"Casey",s:0},
+    {n:"Liberty",s:0},{n:"Shakedown",s:1},{n:"Wheel",s:1},{n:"Shakedown",s:0},{n:"Midnight",s:0},{n:"China Cat",s:1},{n:"Rider",s:0},{n:"Peggy-O",s:0},{n:"Dire Wolf",s:1},{n:"GDTRFB",s:0},{n:"Music",s:0}
+  ]},
+  "2026-02-13": { setBreak: 10, songs: [
+    {n:"Half-Step",s:0},{n:"Cassidy",s:0},{n:"Roses",s:0},{n:"Easy Wind",s:0},{n:"Scarlet",s:1},{n:"Sugar Mag",s:0},{n:"Beat It",s:0},{n:"TLEO",s:0},{n:"Casey",s:0},{n:"Bucket",s:0},
+    {n:"Greatest",s:0},{n:"Foolish",s:0},{n:"Eyes",s:1},{n:"Minglewood",s:0},{n:"El Paso",s:0},{n:"Jack Straw",s:0},{n:"Throwin",s:1},{n:"GDTRFB",s:0}
+  ]},
+  "2026-01-30": { setBreak: 10, songs: [
+    {n:"Samson",s:0},{n:"Cassidy",s:0},{n:"Maggie's",s:0},{n:"Cumberland",s:0},{n:"Box Rain",s:0},{n:"Scarlet",s:1},{n:"Fire",s:0},{n:"Monkey",s:0},{n:"Music",s:0},
+    {n:"Promised",s:0},{n:"Eyes",s:0},{n:"Dark Star",s:0},{n:"Miracle",s:0},{n:"UJB",s:0},{n:"Only River",s:0},{n:"Stranger",s:0},{n:"He's Gone",s:0},{n:"Lovelight",s:0},{n:"West LA",s:0},{n:"Bucket",s:0}
+  ]},
+  "2026-01-22": { setBreak: 11, songs: [
+    {n:"Other One",s:1},{n:"Cassidy",s:0},{n:"China Cat",s:1},{n:"Rider",s:0},{n:"Me & Uncle",s:0},{n:"Mexicali",s:0},{n:"Only River",s:0},{n:"Jack Straw",s:0},{n:"Masterpiece",s:0},
+    {n:"Monkey",s:0},{n:"Music",s:0},{n:"Greatest",s:0},{n:"Sugar Mag",s:0},{n:"Esau",s:0},{n:"Stranger",s:0},{n:"Brokedown",s:0},{n:"Miracle",s:0},{n:"Playin",s:0},{n:"Throwin",s:1},{n:"Other One",s:0},{n:"Touch",s:0},{n:"Sat. Night",s:0}
+  ]},
+  "2026-01-09": { setBreak: null, songs: [
+    {n:"Music",s:0},{n:"Ramble",s:0},{n:"Greatest",s:0},{n:"Shakedown",s:0},{n:"Help",s:1},{n:"Slipknot",s:1},{n:"Franklin's",s:0},{n:"Jack Straw",s:0},{n:"Stella",s:0},{n:"Throwin",s:0}
+  ]},
+  "2026-01-03": { setBreak: 11, songs: [
+    {n:"Eyes",s:1},{n:"Waterfalls",s:0},{n:"Eyes",s:0},{n:"Bucket",s:0},{n:"Cold Rain",s:0},{n:"Bird Song",s:0},{n:"Cumberland",s:0},{n:"Jack A Roe",s:0},{n:"Help",s:1},{n:"Slipknot",s:1},{n:"Music",s:0},
+    {n:"Sugar Mag",s:1},{n:"Scarlet",s:0},{n:"Estimated",s:0},{n:"China Cat",s:1},{n:"Rider",s:0},{n:"Terrapin",s:1},{n:"GDTRFB",s:0},{n:"Terrapin",s:0},{n:"Deal",s:0}
+  ]},
+  "2025-12-12": { setBreak: 10, songs: [
+    {n:"Scarlet",s:1},{n:"GDTRFB",s:0},{n:"Cream Puff",s:0},{n:"Cold Rain",s:0},{n:"Deep Elem",s:0},{n:"Cassidy",s:0},{n:"Greatest",s:0},{n:"China Cat",s:1},{n:"Rider",s:0},{n:"Brown Eyed",s:0},
+    {n:"Throwin",s:1},{n:"Speedway",s:1},{n:"Throwin",s:0},{n:"Stella",s:1},{n:"Eyes",s:1},{n:"Touch",s:0}
+  ]},
+  "2025-12-06": { setBreak: 10, songs: [
+    {n:"Casey",s:0},{n:"Speedway",s:1},{n:"Bird Song",s:0},{n:"China Cat",s:1},{n:"Rider",s:0},{n:"Dire Wolf",s:0},{n:"Peggy-O",s:0},{n:"Let It Grow",s:0},{n:"Jack Straw",s:0},{n:"Deal",s:0},
+    {n:"Help",s:1},{n:"Slipknot",s:1},{n:"Music",s:0},{n:"Estimated",s:0},{n:"Eyes",s:0},{n:"Shakedown",s:0},{n:"Terrapin",s:1},{n:"Wharf Rat",s:0},{n:"Deal",s:0}
+  ]},
+  "2025-11-22": { setBreak: 9, songs: [
+    {n:"Eyes",s:1},{n:"Sugaree",s:0},{n:"Greatest",s:0},{n:"Candyman",s:0},{n:"El Paso",s:0},{n:"Dupree's",s:0},{n:"Bird Song",s:0},{n:"Miracle",s:0},{n:"Cumberland",s:0},
+    {n:"Throwin",s:1},{n:"NFA",s:0},{n:"Foolish",s:0},{n:"Stella",s:0},{n:"Shakedown",s:1},{n:"2001",s:0},{n:"UJB",s:0},{n:"Playin",s:0},{n:"Deal",s:0}
+  ]},
+};
+
+const ABBRS = {
+  "Scarlet Begonias":"Scarlet Begonias",
+  "Eyes Of The World":"Eyes Of The World",
+  "China Cat Sunflower":"China Cat",
+  "Goin' Down The Road Feeling Bad":"Goin' Down Road",
+  "Jack Straw":"Jack Straw",
+  "The Music Never Stopped":"Music Never Stop",
+  "Greatest Story Ever Told":"Greatest Story",
+  "Cassidy":"Cassidy",
+  "Casey Jones":"Casey Jones",
+  "Fire On The Mountain":"Fire On Mountain",
+  "I Know You Rider":"I Know You Rider",
+  "Shakedown Street":"Shakedown St.",
+  "Sugar Magnolia":"Sugar Magnolia",
+  "Cold Rain And Snow":"Cold Rain & Snow",
+  "Hell In A Bucket":"Hell In A Bucket",
+  "Throwing Stones":"Throwing Stones",
+  "They Love Each Other":"They Love Each",
+  "Cumberland Blues":"Cumberland Blues",
+  "Feel Like A Stranger":"Like A Stranger",
+  "I Need A Miracle":"Need A Miracle",
+  "Waiting For A Miracle":"Wait For Miracle",
+  "Playing In The Band":"Playing In Band",
+  "Touch Of Grey":"Touch Of Grey",
+  "Bird Song":"Bird Song",
+  "Brown Eyed Women":"Brown Eyed Women",
+  "Dire Wolf":"Dire Wolf",
+  "Midnight Moonlight":"Midnight Moon",
+  "Peggy-O":"Peggy-O",
+  "The Wheel":"The Wheel",
+  "El Paso":"El Paso",
+  "Foolish Heart":"Foolish Heart",
+  "Monkey And The Engineer":"Monkey & Engineer",
+  "Only A River":"Only A River",
+  "Uncle John's Band":"Uncle John's Band",
+  "West L.A. Fadeaway":"West LA Fadeaway",
+  "Brokedown Palace":"Brokedown Palace",
+  "New Speedway Boogie":"Speedway Boogie",
+  "Stella Blue":"Stella Blue",
+  "Deal":"Deal",
+  "Sugaree":"Sugaree",
+  "Golden Road":"Golden Road",
+  "Just Like Tom Thumb's Blues":"Tom Thumb Blues",
+  "Liberty":"Liberty",
+  "Beat It On Down The Line":"Beat It On Down",
+  "Easy Wind":"Easy Wind",
+  "It Must Have Been The Roses":"Roses",
+  "Mississippi Half-Step Uptown Toodeloo":"Half-Step",
+  "New Minglewood Blues":"Minglewood Blues",
+  "Box Of Rain":"Box Of Rain",
+  "Dark Star":"Dark Star",
+  "He's Gone":"He's Gone",
+  "Maggie's Farm":"Maggie's Farm",
+  "Promised Land":"Promised Land",
+  "Samson And Delilah":"Samson & Delilah",
+  "Turn On Your Lovelight":"Lovelight",
+  "Brother Esau":"Brother Esau",
+  "Me And My Uncle":"Me & My Uncle",
+  "Mexicali Blues":"Mexicali Blues",
+  "The Other One":"The Other One",
+  "When I Paint My Masterpiece":"Paint Masterpiece",
+  "Cream Puff War":"Cream Puff War",
+  "Deep Elem Blues":"Deep Elem Blues",
+  "Let It Grow":"Let It Grow",
+  "2001":"2001",
+  "Candyman":"Candyman",
+  "Dupree's Diamond Blues":"Dupree's Diamond",
+  "Not Fade Away":"Not Fade Away",
+  "Loser":"Loser",
+  "Terrapin Station":"Terrapin Station",
+  "Bertha":"Bertha",
+  "Ramble On Rose":"Ramble On Rose",
+  "Althea":"Althea",
+  "Cats Under The Stars":"Cats Under Stars",
+  "Franklin's Tower":"Franklin's Tower",
+  "Help On The Way":"Help On The Way",
+  "Ripple":"Ripple",
+  "Row Jimmy":"Row Jimmy",
+  "Rubin And Cherise":"Rubin & Cherise",
+  "Slipknot!":"Slipknot!",
+  "Estimated Prophet":"Estimated Prophet",
+  "Jack A Roe":"Jack A Roe",
+  "Waterfalls":"Waterfalls",
+  "Black Peter":"Black Peter",
+  "Ship Of Fools":"Ship Of Fools",
+  "Don't Ease Me In":"Don't Ease Me In",
+  "St. Stephen":"St. Stephen",
+  "The Eleven":"The Eleven",
+  "Morning Dew":"Morning Dew",
+  "US Blues":"US Blues",
+  "Werewolves Of London":"Werewolves",
+  "Wharf Rat":"Wharf Rat",
+  "Race Is On":"Race Is On",
+  "Black Muddy River":"Black Muddy Rvr",
+  "Alabama Getaway":"Alabama Getaway",
+  "Big Railroad Blues":"Big Railroad",
+  "Big River":"Big River",
+  "Built To Last":"Built To Last",
+  "China Doll":"China Doll",
+  "Crazy Fingers":"Crazy Fingers",
+  "Dancin' In The Streets":"Dancin' In Street",
+  "Dark Hollow":"Dark Hollow",
+  "Don't Let Go":"Don't Let Go",
+  "Friend Of The Devil":"Friend Of Devil",
+  "Good Lovin'":"Good Lovin'",
+  "Here Comes Sunshine":"Here Comes Sun",
+  "Hey Pocky Way":"Hey Pocky Way",
+  "Lazy River Road":"Lazy River Road",
+  "Loose Lucy":"Loose Lucy",
+  "Mama Tried":"Mama Tried",
+  "Might As Well":"Might As Well",
+  "Mister Charlie":"Mister Charlie",
+  "On The Road Again":"On The Road Again",
+  "One More Saturday Night":"Saturday Night",
+  "Queen Jane Approximately":"Queen Jane",
+  "Stagger Lee":"Stagger Lee",
+  "Standing On The Moon":"Standing On Moon",
+  "Supplication":"Supplication",
+  "Tennessee Jed":"Tennessee Jed",
+  "That's What Love Will Make You Do":"That's What Love",
+  "The Harder They Come":"Harder They Come",
+  "Viola Lee Blues":"Viola Lee Blues",
+  "Women Are Smarter":"Women Smarter",
+  "Walkin' Blues":"Walkin' Blues",
+  "Truckin'":"Truckin'",
+  "Saint Of Circumstance":"Saint Of Circ.",
+  "Lost Sailor":"Lost Sailor",
+  "Iko Iko":"Iko Iko",
+  "So Many Roads":"So Many Roads",
+  "Black Throated Wind":"Black Throated W",
+  "Lazy Lightning":"Lazy Lightning",
+  "Picasso Moon":"Picasso Moon",
+  "Mission In The Rain":"Mission In Rain",
+  "Cosmic Charlie":"Cosmic Charlie",
+  "Run For The Roses":"Run For The Roses",
+  "Victim Or The Crime":"Victim Or Crime",
+};
+
+// Songs array. dates[] are chronological (oldest → newest).
+const SONGS_DATA = [
+  { name: "Eyes Of The World", dates: ["2025-11-22","2025-12-06","2025-12-12","2026-01-03","2026-01-30","2026-02-13","2026-04-17"] },
+  { name: "The Music Never Stopped", dates: ["2025-12-06","2026-01-03","2026-01-09","2026-01-22","2026-01-30","2026-03-06","2026-04-17"] },
+  { name: "China Cat Sunflower", dates: ["2025-12-06","2025-12-12","2026-01-03","2026-01-22","2026-03-06","2026-04-17"] },
+  { name: "I Know You Rider", dates: ["2025-12-06","2025-12-12","2026-01-03","2026-01-22","2026-03-06","2026-04-17"] },
+  { name: "Jack Straw", dates: ["2025-12-06","2026-01-09","2026-01-22","2026-02-13","2026-03-06","2026-05-16"] },
+  { name: "Scarlet Begonias", dates: ["2025-12-12","2026-01-03","2026-01-30","2026-02-13","2026-03-06","2026-05-16"] },
+  { name: "Greatest Story Ever Told", dates: ["2025-11-22","2025-12-12","2026-01-09","2026-01-22","2026-02-13","2026-04-17"] },
+  { name: "Cassidy", dates: ["2025-12-12","2026-01-22","2026-01-30","2026-02-13","2026-04-17"] },
+  { name: "Shakedown Street", dates: ["2025-11-22","2025-12-06","2026-01-09","2026-03-06","2026-03-21"] },
+  { name: "Throwing Stones", dates: ["2025-11-22","2025-12-12","2026-01-09","2026-01-22","2026-02-13"] },
+  { name: "I Need A Miracle", dates: ["2025-11-22","2026-01-22","2026-01-30"] },
+  { name: "Waiting For A Miracle", dates: ["2026-04-17","2026-05-16"] },
+  { name: "Casey Jones", dates: ["2025-12-06","2026-02-13","2026-03-06","2026-03-21"] },
+  { name: "Goin' Down The Road Feeling Bad", dates: ["2025-12-12","2026-01-03","2026-02-13","2026-03-06"] },
+  { name: "Sugar Magnolia", dates: ["2026-01-03","2026-01-22","2026-02-13","2026-03-06"] },
+  { name: "Deal", dates: ["2025-11-22","2025-12-06","2026-01-03","2026-04-17"] },
+  { name: "Cold Rain And Snow", dates: ["2025-12-12","2026-01-03","2026-03-06"] },
+  { name: "Estimated Prophet", dates: ["2025-12-06","2026-01-03","2026-03-21"] },
+  { name: "Feel Like A Stranger", dates: ["2026-01-22","2026-01-30","2026-03-21"] },
+  { name: "Terrapin Station", dates: ["2025-12-06","2026-01-03","2026-03-21"] },
+  { name: "Stella Blue", dates: ["2025-11-22","2025-12-12","2026-01-09"] },
+  { name: "Brown Eyed Women", dates: ["2025-12-12","2026-03-06","2026-05-16"] },
+  { name: "One More Saturday Night", dates: ["2026-01-22","2026-03-21","2026-05-16"] },
+  { name: "The Other One", dates: ["2026-01-22","2026-04-17","2026-05-16"] },
+  { name: "Cumberland Blues", dates: ["2025-11-22","2026-01-03","2026-01-30"] },
+  { name: "Hell In A Bucket", dates: ["2026-01-03","2026-01-30","2026-02-13"] },
+  { name: "Bird Song", dates: ["2025-11-22","2025-12-06","2026-01-03"] },
+  { name: "Help On The Way", dates: ["2025-12-06","2026-01-03","2026-01-09"] },
+  { name: "Slipknot!", dates: ["2025-12-06","2026-01-03","2026-01-09"] },
+  { name: "Fire On The Mountain", dates: ["2026-01-30","2026-03-06","2026-05-16"] },
+  { name: "Foolish Heart", dates: ["2025-11-22","2026-02-13","2026-05-16"] },
+  { name: "Touch Of Grey", dates: ["2025-12-12","2026-01-22"] },
+  { name: "New Speedway Boogie", dates: ["2025-12-06","2025-12-12"] },
+  { name: "Playing In The Band", dates: ["2025-11-22","2026-01-22"] },
+  { name: "Monkey And The Engineer", dates: ["2026-01-22","2026-01-30"] },
+  { name: "Only A River", dates: ["2026-01-22","2026-01-30"] },
+  { name: "Ramble On Rose", dates: ["2026-01-09","2026-03-21"] },
+  { name: "Sugaree", dates: ["2025-11-22","2026-03-21"] },
+  { name: "Let It Grow", dates: ["2025-12-06","2026-03-21"] },
+  { name: "Brother Esau", dates: ["2026-01-22","2026-04-17"] },
+  { name: "Loser", dates: ["2026-03-21","2026-05-16"] },
+  { name: "Me And My Uncle", dates: ["2026-01-22","2026-05-16"] },
+  { name: "St. Stephen", dates: ["2026-03-21","2026-05-16"] },
+  { name: "El Paso", dates: ["2025-11-22","2026-02-13"] },
+  { name: "Uncle John's Band", dates: ["2025-11-22","2026-01-30"] },
+  { name: "Peggy-O", dates: ["2025-12-06","2026-03-06"] },
+  { name: "Dire Wolf", dates: ["2025-12-06","2026-03-06"] },
+  { name: "Mississippi Half-Step Uptown Toodeloo", dates: ["2026-02-13","2026-04-17"] },
+  { name: "He's Gone", dates: ["2026-01-30","2026-04-17"] },
+  { name: "Franklin's Tower", dates: ["2026-01-09","2026-05-16"] },
+  { name: "Althea", dates: ["2026-03-21"] },
+  { name: "Bertha", dates: ["2026-03-21"] },
+  { name: "Brokedown Palace", dates: ["2026-01-22"] },
+  { name: "China Doll", dates: ["2026-03-21"] },
+  { name: "Cream Puff War", dates: ["2025-12-12"] },
+  { name: "Deep Elem Blues", dates: ["2025-12-12"] },
+  { name: "Friend Of The Devil", dates: ["2026-03-21"] },
+  { name: "Mexicali Blues", dates: ["2026-01-22"] },
+  { name: "Might As Well", dates: ["2026-03-21"] },
+  { name: "Rubin And Cherise", dates: ["2026-03-21"] },
+  { name: "US Blues", dates: ["2026-03-21"] },
+  { name: "Walkin' Blues", dates: ["2026-03-21"] },
+  { name: "When I Paint My Masterpiece", dates: ["2026-01-22"] },
+  { name: "2001", dates: ["2025-11-22"] },
+  { name: "Alabama Getaway", dates: ["2026-04-17"] },
+  { name: "Beat It On Down The Line", dates: ["2026-02-13"] },
+  { name: "Black Peter", dates: ["2026-04-17"] },
+  { name: "Box Of Rain", dates: ["2026-01-30"] },
+  { name: "Built To Last", dates: ["2026-04-17"] },
+  { name: "Candyman", dates: ["2025-11-22"] },
+  { name: "Cats Under The Stars", dates: ["2026-04-17"] },
+  { name: "Dark Star", dates: ["2026-01-30"] },
+  { name: "Don't Let Go", dates: ["2026-05-16"] },
+  { name: "Dupree's Diamond Blues", dates: ["2025-11-22"] },
+  { name: "Easy Wind", dates: ["2026-02-13"] },
+  { name: "Golden Road", dates: ["2026-03-06"] },
+  { name: "It Must Have Been The Roses", dates: ["2026-02-13"] },
+  { name: "Jack A Roe", dates: ["2026-01-03"] },
+  { name: "Just Like Tom Thumb's Blues", dates: ["2026-03-06"] },
+  { name: "Liberty", dates: ["2026-03-06"] },
+  { name: "Maggie's Farm", dates: ["2026-01-30"] },
+  { name: "Midnight Moonlight", dates: ["2026-03-06"] },
+  { name: "Mister Charlie", dates: ["2026-04-17"] },
+  { name: "New Minglewood Blues", dates: ["2026-02-13"] },
+  { name: "Not Fade Away", dates: ["2025-11-22"] },
+  { name: "Promised Land", dates: ["2026-01-30"] },
+  { name: "Ripple", dates: ["2026-05-16"] },
+  { name: "Samson And Delilah", dates: ["2026-01-30"] },
+  { name: "Tennessee Jed", dates: ["2026-04-17"] },
+  { name: "The Eleven", dates: ["2026-05-16"] },
+  { name: "The Wheel", dates: ["2026-03-06"] },
+  { name: "They Love Each Other", dates: ["2026-02-13"] },
+  { name: "Turn On Your Lovelight", dates: ["2026-01-30"] },
+  { name: "Viola Lee Blues", dates: ["2026-05-16"] },
+  { name: "Waterfalls", dates: ["2026-01-03"] },
+  { name: "West L.A. Fadeaway", dates: ["2026-01-30"] },
+  { name: "Wharf Rat", dates: ["2025-12-06"] },
+  // 0 plays in window (still in repertoire)
+  { name: "Big Railroad Blues", dates: [] },
+  { name: "Big River", dates: [] },
+  { name: "Black Muddy River", dates: [] },
+  { name: "Crazy Fingers", dates: [] },
+  { name: "Dancin' In The Streets", dates: [] },
+  { name: "Dark Hollow", dates: [] },
+  { name: "Don't Ease Me In", dates: [] },
+  { name: "Good Lovin'", dates: [] },
+  { name: "Here Comes Sunshine", dates: [] },
+  { name: "Hey Pocky Way", dates: [] },
+  { name: "Lazy River Road", dates: [] },
+  { name: "Loose Lucy", dates: [] },
+  { name: "Mama Tried", dates: [] },
+  { name: "Morning Dew", dates: [] },
+  { name: "On The Road Again", dates: [] },
+  { name: "Queen Jane Approximately", dates: [] },
+  { name: "Race Is On", dates: [] },
+  { name: "Row Jimmy", dates: [] },
+  { name: "Ship Of Fools", dates: [] },
+  { name: "Stagger Lee", dates: [] },
+  { name: "Standing On The Moon", dates: [] },
+  { name: "Supplication", dates: [] },
+  { name: "That's What Love Will Make You Do", dates: [] },
+  { name: "The Harder They Come", dates: [] },
+  { name: "Werewolves Of London", dates: [] },
+  { name: "Women Are Smarter", dates: [] },
+  // Canonical, not yet in DEAL repertoire
+  { name: "Black Throated Wind", dates: [], canonical: true },
+  { name: "Cosmic Charlie", dates: [], canonical: true },
+  { name: "Iko Iko", dates: [], canonical: true },
+  { name: "Lazy Lightning", dates: [], canonical: true },
+  { name: "Lost Sailor", dates: [], canonical: true },
+  { name: "Mission In The Rain", dates: [], canonical: true },
+  { name: "Picasso Moon", dates: [], canonical: true },
+  { name: "Run For The Roses", dates: [], canonical: true },
+  { name: "Saint Of Circumstance", dates: [], canonical: true },
+  { name: "So Many Roads", dates: [], canonical: true },
+  { name: "Truckin'", dates: [], canonical: true },
+  { name: "Victim Or The Crime", dates: [], canonical: true },
+];
+
+const SONGS = SONGS_DATA.map(s => Object.assign({}, s, { abbr: ABBRS[s.name] || s.name }));
+
+const TOTAL_SETS = 23;
+const TOTAL_SONGS = 134;   // From DEALBASE; excludes canonical-not-yet-played
+const CW = 15;
+
+const SEGUE_CHAINS = [
+  ["China Cat Sunflower","I Know You Rider"],
+  ["Scarlet Begonias","Fire On The Mountain"],
+  ["Help On The Way","Slipknot!","Franklin's Tower"],
+  ["Shakedown Street","The Wheel"],
+  ["Throwing Stones","The Other One"],
+  ["Throwing Stones","Goin' Down The Road Feeling Bad"],
+  ["Throwing Stones","New Speedway Boogie"],
+  ["Dire Wolf","Goin' Down The Road Feeling Bad"],
+  ["Scarlet Begonias","Sugar Magnolia"],
+  ["Stella Blue","Eyes Of The World"],
+  ["Terrapin Station","I Know You Rider"],
+  ["Terrapin Station","Goin' Down The Road Feeling Bad"],
+  ["St. Stephen","The Eleven"],
+  ["He's Gone","The Other One"],
+];
+
+const MONTHS = ["Jan","Feb","Mar","Apr","May","Jun","Jul","Aug","Sep","Oct","Nov","Dec"];
+
+// ===== UTILITY =====
+function daysBetween(dateStr) {
+  // dateStr: "YYYY-MM-DD". Returns whole days between today (local) and that date.
+  const today = new Date();
+  today.setHours(0, 0, 0, 0);
+  const parts = dateStr.split("-").map(Number);
+  const d = new Date(parts[0], parts[1] - 1, parts[2]);
+  d.setHours(0, 0, 0, 0);
+  return Math.round((today - d) / 86400000);
+}
+
+function daysSinceLastPlay(song) {
+  if (!song.dates.length) return null;
+  return daysBetween(song.dates[song.dates.length - 1]);
+}
+
+function freqSort(a, b) {
+  if (b.dates.length !== a.dates.length) return b.dates.length - a.dates.length;
+  return a.abbr.localeCompare(b.abbr);
+}
+
+function applySegueGrouping(sorted) {
+  const result = sorted.slice();
+  const moved = new Set();
+  for (const chain of SEGUE_CHAINS) {
+    const leaderIdx = result.findIndex(s => s.name === chain[0]);
+    if (leaderIdx === -1) continue;
+    const leaderFreq = result[leaderIdx].dates.length;
+    let insertAt = leaderIdx + 1;
+    for (let j = 1; j < chain.length; j++) {
+      const follower = chain[j];
+      if (moved.has(follower)) continue;
+      const fIdx = result.findIndex(s => s.name === follower);
+      if (fIdx === -1) continue;
+      const followerFreq = result[fIdx].dates.length;
+      if (leaderFreq === followerFreq) {
+        if (fIdx > insertAt) {
+          const [item] = result.splice(fIdx, 1);
+          result.splice(insertAt, 0, item);
+          moved.add(follower);
+          insertAt++;
+        } else if (fIdx === insertAt) {
+          moved.add(follower);
+          insertAt++;
+        }
+      }
+    }
+  }
+  return result;
+}
+
+function escapeHtml(s) {
+  return String(s).replace(/[&<>"']/g, c => ({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
+}
+
+// ===== STATE =====
+const state = {
+  search: "",
+  sort: "freq",                  // "freq" | "alpha"
+  selectedShow: SHOWS[0].date,
+};
+
+function setState(updates) {
+  Object.assign(state, updates);
+  render();
+}
+
+// ===== RENDER =====
+function renderHeader() {
+  return `
+    <div class="header-bar">
+      <span class="brand"><strong>DEALAMP</strong> v1.0</span>
+      <span class="credit">© DR BONES</span>
+    </div>`;
+}
+
+function renderStats() {
+  const played = SONGS.filter(s => s.dates.length > 0 && !s.canonical).length;
+  const totalPlays = SONGS.reduce((a, s) => a + s.dates.length, 0);
+  const sps = (totalPlays / TOTAL_SETS).toFixed(1);
+  const cells = [
+    { l: "SHOWS",     v: SHOWS.length },
+    { l: "SETS",      v: TOTAL_SETS },
+    { l: "SONGS",     v: played },
+    { l: "PLAYS",     v: totalPlays },
+    { l: "SONGS/SET", v: sps },
+  ];
+  return `<div class="stats">${
+    cells.map(c => `<div class="cell"><div class="val">${c.v}</div><div class="label">${c.l}</div></div>`).join("")
+  }</div>`;
+}
+
+function renderShowButtons() {
+  return `<div class="show-buttons">${
+    SHOWS.map(s => {
+      const active = state.selectedShow === s.date;
+      const style = `border:1px solid ${active ? s.color : "#333"};background:${active ? s.color + "22" : "transparent"};color:${active ? "#fff" : "#ccc"};`;
+      return `<button class="show-btn" data-date="${s.date}" style="${style}">
+        <span class="dot" style="background:${s.color}"></span>
+        <span>${s.short} ${escapeHtml(s.abbr)}</span>
+      </button>`;
+    }).join("")
+  }</div>`;
+}
+
+function renderSetSongs(arr) {
+  return arr.map((s, i) => {
+    const tail = s.s ? "&nbsp;&gt;&nbsp;" : (i < arr.length - 1 ? ", " : "");
+    const style = s.n === "?" ? ' style="color:#555;font-style:italic"' : "";
+    return `<span${style}>${escapeHtml(s.n)}${tail}</span>`;
+  }).join("");
+}
+
+function renderSetlist() {
+  const sl = SETLISTS[state.selectedShow];
+  if (!sl) return "";
+  const showObj = SHOWS.find(s => s.date === state.selectedShow);
+  const color = showObj.color;
+  let body;
+  if (sl.setBreak === null) {
+    body = `<div><span class="set-label" style="color:${color}">I:</span>${renderSetSongs(sl.songs)}</div>`;
+  } else {
+    const set1 = sl.songs.slice(0, sl.setBreak);
+    const set2 = sl.songs.slice(sl.setBreak);
+    body = `
+      <div><span class="set-label" style="color:${color}">I:</span>${renderSetSongs(set1)}</div>
+      <div style="margin-top:4px"><span class="set-label" style="color:${color}">II:</span>${renderSetSongs(set2)}</div>`;
+  }
+  return `<div class="setlist-panel">
+    <div class="setlist-header" style="color:${color}">${escapeHtml(showObj.venue)}, ${showObj.short}</div>
+    <div class="setlist-body">${body}</div>
+  </div>`;
+}
+
+function renderSearch() {
+  return `<div class="search-row">
+    <input id="search-input" type="text" placeholder="search..." value="${escapeHtml(state.search)}">
+  </div>`;
+}
+
+function renderSortRow() {
+  const btn = (key, label) =>
+    `<button class="sort-btn ${state.sort === key ? "active" : ""}" data-sort="${key}">${label}</button>`;
+  return `<div class="sort-row">${btn("freq","FREQ")}${btn("alpha","A-Z")}</div>`;
+}
+
+function renderGridHeader(gridShows) {
+  const showFilter = state.selectedShow;
+  // Month labels (only show when month changes)
+  const monthLabels = gridShows.map((s, i) => {
+    const d = new Date(s.date + "T00:00:00");
+    const m = MONTHS[d.getMonth()];
+    if (i === 0) return m;
+    const prev = new Date(gridShows[i-1].date + "T00:00:00");
+    return MONTHS[prev.getMonth()] !== m ? m : "";
+  });
+  const days = gridShows.map(s => new Date(s.date + "T00:00:00").getDate());
+  const monthRow = gridShows.map((s, i) => {
+    const hl = s.date === showFilter;
+    const color = hl ? s.color : "#00e040";
+    const fw = hl ? "bold" : "normal";
+    return `<div class="grid-header-cell" style="color:${color};font-weight:${fw}">${monthLabels[i]}</div>`;
+  }).join("");
+  const dayRow = gridShows.map((s, i) => {
+    const hl = s.date === showFilter;
+    const color = hl ? s.color : "#ccc";
+    return `<div class="grid-header-cell" style="color:${color};margin-top:2px">${days[i]}</div>`;
+  }).join("");
+  return `<div class="grid-header">
+    <div class="grid-header-spacer"></div>
+    <div class="grid-header-flex"></div>
+    <div class="grid-header-days-label">DAYS</div>
+    <div class="grid-header-shows" style="width:${gridShows.length * CW}px">
+      <div class="grid-header-row">${monthRow}</div>
+      <div class="grid-header-row" style="margin-top:2px">${dayRow}</div>
+    </div>
+  </div>`;
+}
+
+function renderSongRow(song, count, showCount, gridShows) {
+  const isCanonical = song.canonical === true;
+  const maxC = 8;
+  const rawT = (maxC - Math.min(count, maxC)) / maxC;
+  const t = 0.375 + 0.625 * rawT;
+  const r = Math.round(200 * (1 - t));
+  const g = Math.round(200 * t);
+  const rowBg = `rgba(${r}, ${g}, 30, 0.09)`;
+  const numColor = `rgb(${Math.min(r + 55, 255)}, ${Math.min(g + 55, 255)}, 50)`;
+  const days = daysSinceLastPlay(song);
+  const daysDisplay = days == null ? "—" : days;
+
+  const dots = gridShows.map(show => {
+    const on = song.dates.includes(show.date);
+    const hl = show.date === state.selectedShow;
+    const bg = hl ? show.color + "18" : "transparent";
+    let inner;
+    if (on) {
+      inner = `<div class="play-dot" style="background:${show.color}"></div>`;
+    } else if (hl) {
+      inner = "";   // blank in highlighted column
+    } else {
+      inner = `<span class="miss-x">x</span>`;
+    }
+    return `<div class="dot-slot" style="background:${bg}">${inner}</div>`;
+  }).join("");
+
+  return `<div class="song-row" style="background:${rowBg}">
+    <div class="song-count" style="color:${numColor}">${showCount ? count : ""}</div>
+    <div class="song-name-cell">
+      <span class="song-name${isCanonical ? " canonical" : ""}">${escapeHtml(song.abbr)}${
+        isCanonical ? '<span class="canonical-star">*</span>' : ""
+      }</span>
+    </div>
+    <div class="days-cell">${daysDisplay}</div>
+    <div class="dots-cell">${dots}</div>
+  </div>`;
+}
+
+function render() {
+  const app = document.getElementById("app");
+  const gridShows = SHOWS.slice().reverse();
+
+  app.innerHTML =
+    renderHeader() +
+    renderStats() +
+    renderShowButtons() +
+    renderSetlist() +
+    renderSearch() +
+    renderSortRow() +
+    renderGridHeader(gridShows) +
+    `<div class="song-list">${renderSongListInner(gridShows)}</div>`;
+
+  // Bindings
+  app.querySelectorAll(".show-btn").forEach(b => {
+    b.addEventListener("click", () => setState({ selectedShow: b.dataset.date }));
+  });
+  app.querySelectorAll(".sort-btn").forEach(b => {
+    b.addEventListener("click", () => setState({ sort: b.dataset.sort }));
+  });
+  const input = document.getElementById("search-input");
+  if (input) {
+    input.addEventListener("input", e => {
+      // Preserve focus & caret across re-render
+      const caret = e.target.selectionStart;
+      state.search = e.target.value;
+      render();
+      const fresh = document.getElementById("search-input");
+      fresh.focus();
+      try { fresh.setSelectionRange(caret, caret); } catch (_) {}
+    });
+  }
+}
+
+function renderSongListInner(gridShows) {
+  let list = SONGS.slice();
+  if (state.search) {
+    const q = state.search.toLowerCase();
+    list = list.filter(s => s.name.toLowerCase().includes(q) || s.abbr.toLowerCase().includes(q));
+  }
+  if (state.sort === "freq") {
+    list.sort(freqSort);
+    list = applySegueGrouping(list);
+  } else {
+    list.sort((a, b) => a.abbr.localeCompare(b.abbr));
+  }
+  let lastCount = null;
+  let html = "";
+  list.forEach((song, i) => {
+    const count = song.dates.length;
+    const showCount = state.sort === "freq" ? count !== lastCount : true;
+    const showDivider = state.sort === "freq" && showCount && i > 0;
+    if (state.sort === "freq") lastCount = count;
+    if (showDivider) html += '<div class="group-divider"></div>';
+    html += renderSongRow(song, count, showCount, gridShows);
+  });
+  return html;
+}
+
+render();
+</script>
+</body>
+</html>
