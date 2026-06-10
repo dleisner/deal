@@ -1,0 +1,186 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="theme-color" content="#070809">
+<meta name="color-scheme" content="dark">
+<title>Dr Bones · June 10, 2026</title>
+<style>
+*{box-sizing:border-box}
+html,body{margin:0;background:#070809;-webkit-text-size-adjust:100%}
+body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,Helvetica,Arial,sans-serif;color:#e6e6e6}
+.wrap{max-width:648px;margin:0 auto;padding:16px 12px 40px}
+.hd{background:#05070b;border:1px solid #23262f;border-bottom:none;border-radius:10px 10px 0 0;padding:8px 14px;font-weight:500;letter-spacing:.02em;font-size:13px;display:flex;justify-content:space-between;align-items:baseline;white-space:nowrap}
+.tbox{border:1px solid #23262f;border-radius:0 0 10px 10px;overflow:hidden;background:#0c0d11}
+.scroll{overflow-x:auto;-webkit-overflow-scrolling:touch;scrollbar-width:none}
+.scroll::-webkit-scrollbar{display:none}
+table{border-collapse:collapse;width:100%;table-layout:fixed;font-variant-numeric:tabular-nums}
+table.day{min-width:624px}
+.h{padding:4px 3px;font-size:9px;color:#d8dae0;font-weight:500;vertical-align:middle;border-bottom:2px solid #2c3140;letter-spacing:.04em;text-align:right;white-space:nowrap}
+.c{padding:3px 3px;font-size:9px;border-bottom:1px solid #15181f;text-align:right;white-space:nowrap;font-variant-numeric:tabular-nums;line-height:1.3;font-weight:500}
+.lf{text-align:left}.ct{text-align:center}
+.dim{color:#8a9099}.wh{color:#e6e6e6}
+.bot{margin-top:6px;display:flex;gap:8px;align-items:flex-start}
+.col{flex:1;min-width:0;display:flex;flex-direction:column;gap:6px}
+.pan{padding:5px 12px;background:#0c0d11;border:1px solid #23262f;border-radius:10px}
+.pan .v{font-size:13px;font-weight:500;letter-spacing:.03em;margin-bottom:2px}
+input[type=range]{width:100%;height:4px;margin:0;display:block;cursor:pointer}
+.leg{padding:6px 10px;border:1px solid #23262f;border-radius:10px;background:#0c0d11;display:flex;flex-direction:column;gap:3px}
+.leg .r{font-size:8px;color:#e6e6e6;font-weight:500;line-height:1.4;white-space:nowrap}
+.leg .k{color:#6f8db0;font-weight:700;letter-spacing:.04em}
+.leg .dis{margin-top:3px;padding-top:4px;border-top:1px solid #23262f;font-size:9px;font-weight:500;color:#8a9099;text-align:center;letter-spacing:.02em}
+.fbox{border:1px solid #23262f;border-radius:10px;overflow:hidden;background:#0c0d11}
+.flbl{color:#6f8db0;font-weight:700;font-size:8px;letter-spacing:.04em}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <div class="hd"><span>🦴 DR BONES</span><span>⚾ Wednesday June 10, 2026</span></div>
+  <div class="tbox"><div class="scroll">
+    <table class="day">
+      <colgroup>
+        <col style="width:52px"><col style="width:26px"><col style="width:62px"><col style="width:34px"><col style="width:36px"><col style="width:78px"><col style="width:28px"><col style="width:30px"><col style="width:10px"><col style="width:62px"><col style="width:34px"><col style="width:36px"><col style="width:78px"><col style="width:28px"><col style="width:30px">
+      </colgroup>
+      <thead><tr style="background:#05070b">
+        <th class="h lf" colspan="2" style="padding:4px 6px">BONE</th>
+        <th class="h lf" style="padding:4px 3px 4px 6px">AWAY</th>
+        <th class="h">OFF</th><th class="h lf" style="padding-left:6px">BULL</th><th class="h lf" style="padding-left:6px">START</th>
+        <th class="h"></th><th class="h"></th>
+        <th class="h ct" style="color:#e0b84a;font-size:11px">@</th>
+        <th class="h lf" style="padding:4px 3px 4px 6px">HOME</th>
+        <th class="h">OFF</th><th class="h lf" style="padding-left:6px">BULL</th><th class="h lf" style="padding-left:6px">START</th>
+        <th class="h"></th><th class="h"></th>
+      </tr></thead>
+      <tbody id="rows"></tbody>
+    </table>
+  </div></div>
+
+  <div class="bot">
+    <div class="col">
+      <div class="pan"><div class="v" id="thrLbl" style="color:#e0b84a">BONE ≥ 6.00</div>
+        <input type="range" id="thr" min="4" max="8" step="0.01" value="6" style="accent-color:#e0b84a"></div>
+      <div class="leg">
+        <div class="r"><span class="k">BONE:</span> Composite game score. If BONE &gt; 6.00, then smash the BUY button.</div>
+        <div class="r"><span class="k">OFF:</span> Run production, contact quality, plate approach, recent output</div>
+        <div class="r"><span class="k">BULL:</span> Late-inning arms, depth, rest, leverage assignments</div>
+        <div class="r"><span class="k">START:</span> Run suppression, swing-and-miss, command, recent trend</div>
+        <div class="dis">🍿 Not financial or medical advice</div>
+      </div>
+    </div>
+    <div class="col">
+      <div class="pan"><div class="v" id="posLbl" style="color:#3fb950">$100</div>
+        <input type="range" id="pos" min="10" max="500" step="10" value="100" style="accent-color:#3fb950"></div>
+      <div class="fbox"><table>
+        <colgroup><col style="width:22%"><col style="width:14%"><col style="width:16%"><col style="width:16%"><col style="width:16%"><col style="width:16%"></colgroup>
+        <thead><tr style="background:#05070b">
+          <th class="h" style="padding:2px 4px"></th><th class="h ct" style="padding:2px 4px">W - L</th>
+          <th class="h" style="padding:2px 6px 2px 3px">POSITION</th><th class="h" style="padding:2px 6px 2px 3px">PAYOUT</th>
+          <th class="h" style="padding:2px 6px 2px 3px">PROFIT</th><th class="h" style="padding:2px 6px 2px 3px">ROI</th>
+        </tr></thead>
+        <tbody id="fin"></tbody>
+      </table></div>
+    </div>
+  </div>
+</div>
+
+<script>
+var GAMES=[{"pick":"SD","away":"CIN","home":"SD","mkt":60,"bone":6.2,"time":"4:10P","boneVersion":"v4.5","aOFF":4.8,"hOFF":1.3,"aBP":1.9,"hBP":8.1,"aB":1.2,"hB":6,"aN":"Singer","hN":"King","aW":2,"aL":6,"aE":5.89,"hW":4,"hL":5,"hE":3.41,"aR":"32-34","hR":"34-32"},{"pick":"LAD","away":"LAD","home":"PIT","mkt":65,"bone":6.09,"time":"6:40P","boneVersion":"v4.5","aOFF":9.9,"hOFF":6.3,"aBP":7.4,"hBP":4.5,"aB":9.3,"hB":5.2,"aN":"Ohtani","hN":"Jones","aW":6,"aL":2,"aE":0.74,"hW":1,"hL":0,"hE":4.82,"aR":"43-24","hR":"34-33"},{"pick":"TB","away":"BOS","home":"TB","mkt":57,"bone":5.96,"time":"1:10P","boneVersion":"v4.5","aOFF":2.8,"hOFF":5.2,"aBP":6.6,"hBP":5.4,"aB":5.5,"hB":9.4,"aN":"Bennett","hN":"Rasmussen","aW":1,"aL":1,"aE":5.28,"hW":5,"hL":2,"hE":2.75,"aR":"27-38","hR":"39-25"},{"pick":"PHI","away":"PHI","home":"TOR","mkt":55,"bone":6.09,"time":"7:07P","boneVersion":"v4.5","aOFF":3.1,"hOFF":3.3,"aBP":8.9,"hBP":6.8,"aB":8.3,"hB":0.9,"aN":"Luzardo","hN":"Scherzer","aW":4,"aL":4,"aE":4.56,"hW":1,"hL":3,"hE":9.64,"aR":"36-31","hR":"33-35"},{"pick":"ATL","away":"ATL","home":"CWS","mkt":58,"bone":5.83,"time":"7:40P","boneVersion":"v4.5","aOFF":6.9,"hOFF":7.3,"aBP":7.7,"hBP":2.8,"aB":9.6,"hB":3.5,"aN":"Sale","hN":"TBD","aW":8,"aL":4,"aE":2.23,"hW":null,"hL":null,"hE":null,"aR":"45-22","hR":"35-31"},{"pick":"DET","away":"MIN","home":"DET","mkt":62,"bone":5.78,"time":"6:40P","boneVersion":"v4.5","aOFF":3.5,"hOFF":4.2,"aBP":2.2,"hBP":3.9,"aB":3.5,"hB":5.5,"aN":"TBD","hN":"Valdez","aW":null,"aL":null,"aE":null,"hW":3,"hL":4,"hE":4.21,"aR":"30-38","hR":"28-39"},{"pick":"LAA","away":"HOU","home":"LAA","mkt":52,"bone":5.99,"time":"9:38P","boneVersion":"v4.5","aOFF":4.5,"hOFF":4.1,"aBP":2.8,"hBP":2.5,"aB":2.9,"hB":8.5,"aN":"Lambert","hN":"Detmers","aW":5,"aL":4,"aE":3.55,"hW":2,"hL":5,"hE":4.26,"aR":"31-38","hR":"26-42"},{"pick":"SEA","away":"SEA","home":"BAL","mkt":51,"bone":5.41,"time":"6:35P","boneVersion":"v4.5","aOFF":7.1,"hOFF":6.5,"aBP":6.8,"hBP":5.7,"aB":8.1,"hB":3,"aN":"Kirby","hN":"Young","aW":5,"aL":5,"aE":4.04,"hW":4,"hL":1,"hE":3.47,"aR":"36-32","hR":"31-37"},{"pick":"MIA","away":"AZ","home":"MIA","mkt":49,"bone":5.48,"time":"6:40P","boneVersion":"v4.5","aOFF":4.2,"hOFF":3.5,"aBP":5.9,"hBP":6.5,"aB":2.6,"hB":5.6,"aN":"Nelson","hN":"Gusto","aW":2,"aL":4,"aE":4.6,"hW":0,"hL":1,"hE":10.8,"aR":"34-32","hR":"32-35"},{"pick":"WSH","away":"WSH","home":"SF","mkt":51,"bone":5.39,"time":"3:45P","boneVersion":"v4.5","aOFF":7.3,"hOFF":5.9,"aBP":1.7,"hBP":2.9,"aB":6.6,"hB":0.9,"aN":"Griffin","hN":"Ray","aW":7,"aL":2,"aE":3.63,"hW":4,"hL":6,"hE":4.12,"aR":"35-33","hR":"27-41"},{"pick":"ATH","away":"MIL","home":"ATH","mkt":50,"bone":4.21,"time":"9:05P","boneVersion":"v4.5","aOFF":6.6,"hOFF":5.4,"aBP":5.9,"hBP":4.3,"aB":2.8,"hB":5.8,"aN":"Sproat","hN":"Perkins","aW":1,"aL":4,"aE":6.17,"hW":2,"hL":3,"hE":6.19,"aR":"41-24","hR":"32-35"},{"pick":"TEX","away":"TEX","home":"KC","mkt":54,"bone":4.78,"time":"7:40P","boneVersion":"v4.5","aOFF":4.7,"hOFF":2.8,"aBP":3.1,"hBP":3.2,"aB":5.1,"hB":3.9,"aN":"Gore","hN":"Lugo","aW":4,"aL":5,"aE":4.23,"hW":2,"hL":4,"hE":3.91,"aR":"32-34","hR":"28-39"},{"pick":"CLE","away":"NYY","home":"CLE","mkt":52,"bone":5.14,"time":"1:10P","boneVersion":"v4.5","aOFF":8.2,"hOFF":3.7,"aBP":6.7,"hBP":6.8,"aB":4.1,"hB":7.7,"aN":"Rodón","hN":"Messick","aW":1,"aL":2,"aE":3.3,"hW":6,"hL":2,"hE":2.48,"aR":"40-26","hR":"37-32"},{"pick":"NYM","away":"STL","home":"NYM","mkt":55,"bone":5.01,"time":"7:10P","boneVersion":"v4.5","aOFF":5.6,"hOFF":3.4,"aBP":4.8,"hBP":6.4,"aB":5.2,"hB":5.5,"aN":"Pallante","hN":"Warren","aW":6,"aL":4,"aE":3.96,"hW":1,"hL":2,"hE":2.01,"aR":"36-28","hR":"29-37"},{"pick":"CHC","away":"CHC","home":"COL","mkt":62,"bone":4.4,"time":"8:40P","boneVersion":"v4.5","aOFF":5.3,"hOFF":2,"aBP":4.3,"hBP":3.3,"aB":6.5,"hB":2.5,"aN":"Imanaga","hN":"Lorenzen","aW":4,"aL":6,"aE":4.74,"hW":2,"hL":8,"hE":8.01,"aR":"34-33","hR":"25-42"}],RESULTS=[{"date":"6/8","bone":7.06,"mkt":61,"won":true,"boneVersion":"literal"},{"date":"6/8","bone":6.66,"mkt":57,"won":true,"boneVersion":"literal"},{"date":"6/8","bone":6.61,"mkt":57,"won":false,"boneVersion":"literal"},{"date":"6/8","bone":6.12,"mkt":53,"won":true,"boneVersion":"literal"},{"date":"6/8","bone":5.53,"mkt":54,"won":true,"boneVersion":"literal"},{"date":"6/8","bone":5.2,"mkt":55,"won":true,"boneVersion":"literal"},{"date":"6/8","bone":4.97,"mkt":53,"won":false,"boneVersion":"literal"},{"date":"6/8","bone":4.87,"mkt":50,"won":true,"boneVersion":"literal"},{"date":"6/9","bone":6.53,"mkt":48,"won":true,"boneVersion":"v4.0"},{"date":"6/9","bone":6.48,"mkt":52,"won":false,"boneVersion":"v4.0"},{"date":"6/9","bone":6.03,"mkt":58,"won":true,"boneVersion":"v4.0"},{"date":"6/9","bone":5.87,"mkt":54,"won":true,"boneVersion":"v4.0"},{"date":"6/9","bone":5.8,"mkt":51,"won":false,"boneVersion":"v4.0"},{"date":"6/9","bone":5.58,"mkt":55,"won":false,"boneVersion":"v4.0"},{"date":"6/9","bone":5.56,"mkt":54,"won":true,"boneVersion":"v4.0"},{"date":"6/9","bone":5.54,"mkt":54,"won":false,"boneVersion":"v4.0"},{"date":"6/9","bone":5.47,"mkt":53,"won":true,"boneVersion":"v4.0"},{"date":"6/9","bone":5.45,"mkt":50,"won":false,"boneVersion":"v4.0"},{"date":"6/9","bone":5.3,"mkt":54,"won":false,"boneVersion":"v4.0"},{"date":"6/9","bone":5.29,"mkt":55,"won":true,"boneVersion":"v4.0"},{"date":"6/9","bone":5.26,"mkt":50,"won":false,"boneVersion":"v4.0"},{"date":"6/9","bone":4.92,"mkt":59,"won":false,"boneVersion":"v4.0"},{"date":"6/9","bone":4.7,"mkt":60,"won":false,"boneVersion":"v4.0"}];
+var PICKBG="rgba(63,185,80,.18)";
+function f1(v){return v==null?"—":(+v).toFixed(1)}
+function f2(v){return v==null?"—":(+v).toFixed(2)}
+function wl(w,l){return (w==null||l==null)?"—":w+"-"+l}
+function tierOf(b,thr,ef){return b>=thr?"fire":b>=ef?"eyes":"fade"}
+function tcol(t){return t==="fire"?"#3fb950":t==="eyes"?"#e3c84a":"#f85149"}
+function temo(t){return t==="fire"?"🔥":t==="eyes"?"👀":"💀"}
+function cell(extra,html){return '<td class="c'+(extra.cls?' '+extra.cls:'')+'" style="'+(extra.style||'')+'">'+html+'</td>'}
+
+function renderRows(thr){
+  var ef=thr-0.4;
+  var s=GAMES.slice().sort(function(a,b){return b.bone-a.bone});
+  var out="",prev=null;
+  for(var i=0;i<s.length;i++){
+    var g=s[i],t=tierOf(g.bone,thr,ef),first=t!==prev,tstart=prev!==null&&t!==prev;
+    var tb=tstart?'border-top:2px solid #4a5160;':'';
+    var aBg=g.pick!==g.home?PICKBG:'transparent', hBg=g.pick===g.home?PICKBG:'transparent';
+    var tr='<tr>';
+    tr+='<td class="c" style="'+tb+'padding:3px 4px;font-size:9px;border-left:3px solid '+tcol(t)+'">'
+      +'<div style="display:flex;align-items:center">'
+      +'<span style="min-width:22px;text-align:right">'+g.bone.toFixed(2)+'</span>'
+      +'<span style="flex:1;text-align:center;font-size:11px">'+(first?temo(t):'')+'</span></div></td>';
+    tr+='<td class="c" style="'+tb+'">'+g.mkt+'¢</td>';
+    tr+='<td class="c lf wh" style="'+tb+'background:'+aBg+';padding:3px 3px"><span style="display:inline-block;width:24px">'+g.away+'</span><span class="dim">'+g.aR+'</span></td>';
+    tr+='<td class="c dim" style="'+tb+'background:'+aBg+'">'+f1(g.aOFF)+'</td>';
+    tr+='<td class="c lf dim" style="'+tb+'background:'+aBg+';padding-left:6px">'+f1(g.aBP)+'</td>';
+    tr+='<td class="c lf" style="'+tb+'background:'+aBg+';padding-left:6px"><span class="dim">'+f1(g.aB)+'</span><span class="wh" style="margin-left:5px">'+g.aN+'</span></td>';
+    tr+='<td class="c dim" style="'+tb+'background:'+aBg+'">'+wl(g.aW,g.aL)+'</td>';
+    tr+='<td class="c dim" style="'+tb+'background:'+aBg+'">'+f2(g.aE)+'</td>';
+    tr+='<td class="c" style="'+tb+'"></td>';
+    tr+='<td class="c lf wh" style="'+tb+'background:'+hBg+';padding:3px 3px"><span style="display:inline-block;width:24px">'+g.home+'</span><span class="dim">'+g.hR+'</span></td>';
+    tr+='<td class="c dim" style="'+tb+'background:'+hBg+'">'+f1(g.hOFF)+'</td>';
+    tr+='<td class="c lf dim" style="'+tb+'background:'+hBg+';padding-left:6px">'+f1(g.hBP)+'</td>';
+    tr+='<td class="c lf" style="'+tb+'background:'+hBg+';padding-left:6px"><span class="dim">'+f1(g.hB)+'</span><span class="wh" style="margin-left:5px">'+g.hN+'</span></td>';
+    tr+='<td class="c dim" style="'+tb+'background:'+hBg+'">'+wl(g.hW,g.hL)+'</td>';
+    tr+='<td class="c dim" style="'+tb+'background:'+hBg+'">'+f2(g.hE)+'</td>';
+    tr+='</tr>';
+    out+=tr;prev=t;
+  }
+  document.getElementById("rows").innerHTML=out;
+}
+
+function dnum(d){var p=d.split("/");return (+p[0])*100+(+p[1])}
+function actual(rows,pos){
+  var N=rows.length,wins=0,payout=0;
+  for(var i=0;i<rows.length;i++){if(rows[i].won){wins++;payout+=pos*100/rows[i].mkt;}}
+  var stake=N*pos;return {N:N,wins:wins,losses:N-wins,stake:stake,payout:payout,profit:payout-stake};
+}
+function usd(n){return "$"+Math.round(n)}
+function sgnUsd(n){return (n>=0?"+$":"-$")+Math.abs(Math.round(n))}
+function sgnPct(p,s){return s>0?((p/s*100>=0?"+":"")+(p/s*100).toFixed(0)+"%"):"—"}
+function frow(label,wl,stake,payout,profit,has,proj,sep){
+  var bt=sep?'border-top:2px solid #3f485c;':'';
+  var dc=proj?'#8a9099':'#e6e6e6', pc=proj?'#8a9099':(profit>=0?'#3fb950':'#f85149');
+  return '<tr>'
+    +'<td class="c lf" style="padding:2px 4px;'+bt+'"><span class="flbl">'+label+'</span></td>'
+    +'<td class="c ct" style="padding:2px 4px;font-size:10px;color:'+dc+';'+bt+'">'+(has?wl:"—")+'</td>'
+    +'<td class="c" style="padding:2px 6px 2px 3px;font-size:10px;color:#8a9099;'+bt+'">'+(has?"$"+stake:"—")+'</td>'
+    +'<td class="c" style="padding:2px 6px 2px 3px;font-size:10px;color:'+dc+';'+bt+'">'+(has?usd(payout):"—")+'</td>'
+    +'<td class="c" style="padding:2px 6px 2px 3px;font-size:10px;color:'+pc+';'+bt+'">'+(has?sgnUsd(profit):"—")+'</td>'
+    +'<td class="c" style="padding:2px 6px 2px 3px;font-size:10px;color:'+pc+';'+bt+'">'+(has?sgnPct(profit,stake):"—")+'</td>'
+    +'</tr>';
+}
+function renderFin(thr,pos){
+  var last=null;for(var i=0;i<RESULTS.length;i++){if(last==null||dnum(RESULTS[i].date)>dnum(last))last=RESULTS[i].date;}
+  var Y=actual(RESULTS.filter(function(r){return r.date===last&&r.bone>=thr}),pos);
+  var CU=actual(RESULTS.filter(function(r){return r.bone>=thr}),pos);
+  var fires=GAMES.filter(function(g){return g.bone>=thr});
+  var Nt=fires.length,stakeT=Nt*pos;
+  var rec=fires.map(function(g){return pos*100/g.mkt}).sort(function(a,b){return a-b});
+  var allWin=rec.reduce(function(a,b){return a+b},0);
+  var out="";
+  out+=frow("YESTERDAY",Y.wins+"-"+Y.losses,Y.stake,Y.payout,Y.profit,Y.N>0,false,false);
+  out+=frow("CUMULATIVE",CU.wins+"-"+CU.losses,CU.stake,CU.payout,CU.profit,CU.N>0,false,true);
+  if(Nt>0){
+    for(var w=Nt;w>=0;w--){
+      var mn,mx;
+      if(w===0){mn=mx=0;}else if(w===Nt){mn=mx=allWin;}
+      else{mn=rec.slice(0,w).reduce(function(a,b){return a+b},0);mx=rec.slice(-w).reduce(function(a,b){return a+b},0);}
+      var mid=(mn+mx)/2;
+      out+=frow(w===Nt?"TODAY":"",w+"-"+(Nt-w),stakeT,mid,mid-stakeT,true,true,w===Nt);
+    }
+  }else{out+=frow("TODAY","—",0,0,0,false,true,true);}
+  document.getElementById("fin").innerHTML=out;
+}
+
+function render(){
+  var thr=+document.getElementById("thr").value, pos=+document.getElementById("pos").value;
+  document.getElementById("thrLbl").textContent="BONE ≥ "+thr.toFixed(2);
+  document.getElementById("posLbl").textContent="$"+pos;
+  renderRows(thr);renderFin(thr,pos);
+}
+document.getElementById("thr").addEventListener("input",render);
+document.getElementById("pos").addEventListener("input",render);
+render();
+</script>
+</body>
+</html>
